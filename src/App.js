@@ -1,11 +1,11 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTable } from "react-table";
 import { columns } from "./constants";
 import "./App.css";
 
 export default function App() {
   const [searchName, setSearchName] = useState("");
-  const [selectedOption, setSelectedOption] = useState(null);
+  const [selectedOption, setSelectedOption] = useState("");
   const [repoMetaData, setAllRepoMetaData] = useState([]);
   const [repoMetrics, setRepoMetrics] = useState({
     forksCount: 0,
@@ -26,7 +26,7 @@ export default function App() {
     contributionsCount: 0,
   });
 
-  const getSingleRepo = useCallback(async (selectedOption) => {
+  const getSingleRepo = async (selectedOption) => {
     const repoName =
       selectedOption !== null ? selectedOption : "acronym-decoder";
     const searchQueryURL = `https://api.github.com/repos/capitalone/${repoName}`;
@@ -51,7 +51,7 @@ export default function App() {
         const contributors_count = await fetch(totalContributorsURL)
           .then((response) => response.json())
           .then((totalContributorsCount) => {
-            const contributors = totalContributorsCount;
+            const contributors = totalContributorsCount || [];
             return {
               totalCount: contributors?.length,
               totalContributionsCount: contributors?.reduce((acc, curr) => {
@@ -88,9 +88,9 @@ export default function App() {
         }));
       })
       .catch((err) => console.log(err));
-  }, []);
+  };
 
-  const getAllRepos = useCallback(async (searchKey) => {
+  const getAllRepos = async (searchKey) => {
     const searchQueryURL = "https://api.github.com/orgs/capitalone/repos";
     return await fetch(searchQueryURL)
       .then((result) => result.json())
@@ -105,25 +105,31 @@ export default function App() {
       })
       .then((result) => setAllRepoMetaData(result))
       .catch((err) => console.log(err));
-  }, []);
+  };
 
-  useEffect(() => {
-    const delayDebounceFn = setTimeout(() => {
-      getSingleRepo(searchName);
-    }, 1000);
-
-    return () => clearTimeout(delayDebounceFn);
-  }, [searchName]);
+  const debounceFunction = (func, delay) => {
+    let timer;
+    return function() {
+      let self = this;
+      let args= arguments;
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        func.apply(self, args)
+      }, delay)
+    }
+  }
 
   const handleSelectedOption = (optionName) => {
     setSelectedOption(optionName);
     setSearchName(optionName);
+    getSingleRepo(optionName);
   };
 
   const handleSearchNameChange = (e) => {
     const searchText = e.target.value;
     setSearchName(searchText);
-    getAllRepos(searchText);
+    const inputSearchDebounceFunc = debounceFunction(getAllRepos, 2000);
+    inputSearchDebounceFunc(searchText);
   };
 
   const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
@@ -136,7 +142,7 @@ export default function App() {
         <input
           placeholder="Search Repository...."
           type="text"
-          onChange={handleSearchNameChange}
+          onChange={(event) => handleSearchNameChange(event)}
           value={searchName}
         />
         <span>Example: acronym-decoder</span>
@@ -145,7 +151,7 @@ export default function App() {
         repos={repoMetaData}
         optionSelect={handleSelectedOption}
       />
-      {repoMetrics.repositoryName && (
+      {selectedOption !== "" && (
         <table {...getTableProps()}>
           <thead>
             {headerGroups.map((headerGroup) => (
