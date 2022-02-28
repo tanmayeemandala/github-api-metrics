@@ -44,3 +44,8 @@ label {
 span {
   padding-left: 20px;
 }
+
+button {
+  padding: 15px;
+  margin-left: 20px;
+}

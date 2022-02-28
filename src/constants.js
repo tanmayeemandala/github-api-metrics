@@ -51,7 +51,7 @@ export const columns = [
         accessor: "openPRCount",
       },
       {
-        Header: "Subscribers",
+        Header: "Watch - Subscribers",
         accessor: "subscribersCount",
       },
       {
