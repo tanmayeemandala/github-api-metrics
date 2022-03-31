@@ -28,9 +28,10 @@ export default function App() {
     contributionsCount: 0,
   });
 
+  // put your auth code here. ex: "token ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxx" 
   const headers = {
     headers: {
-      Authorization: "token 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"
+      Authorization: ""
     }
   }
 
