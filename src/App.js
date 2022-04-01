@@ -28,10 +28,10 @@ export default function App() {
     contributionsCount: 0,
   });
 
-  // put your auth code here. ex: "token ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxx" 
+
   const headers = {
     headers: {
-      Authorization: ""
+      Authorization: `token ${process.env.REACT_APP_MY_ENVIRONMENT_VARIABLE}`
     }
   }
 
@@ -53,7 +53,6 @@ export default function App() {
     return await fetch(searchQueryURL, headers)
       .then((result) => result.json())
       .then(async (response) => {
-        console.log("Checking", response);
         const commits_count = await fetch(commitsURL, headers).then((commitRes) =>
             commitRes.json()
         );
@@ -167,7 +166,6 @@ const handleSearchNameChange = (e) => {
 };
 
 const handleSaveOrgName = (event) => {
-  console.log(orgRepoName);
   event.preventDefault()
   setSaved(true);
 }
